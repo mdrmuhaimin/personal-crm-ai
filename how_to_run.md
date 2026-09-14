@@ -1,8 +1,8 @@
-# How to Run — AI Conference CRM (Task 4)
+# How to Run — AI Conference CRM
 
-This document describes how to set up and run what has been built so far: the **LangGraph capture graph** with deterministic input validation, business-card extraction, optional voice-note transcription, and SQLite contact create/update.
+This guide covers the current capture workflow, typed/voice notes, SQLite writes and verification, vector retrieval, and Discord adapter. See [current status](README.md) and [architecture limitations](docs/architecture.md). Default retrieval uses token hashes, not learned semantic embeddings.
 
-Repeating the same card updates the existing row. The default database is `data/crm.db`.
+Repeating a card updates a matching row and appends submitted notes. Matching uses email if present, otherwise phone, otherwise name + company; an unmatched stronger key does not fall through. The default database is `data/crm.db`.
 
 ---
 
@@ -156,7 +156,7 @@ python -m crm --name "Sarah Khan" --image input/visiting_card.png --notes "Poten
 
 Name + image still complete when `--voice` and `--notes` are omitted. Absence of notes is normal success.
 
-Semantic query against stored embeddings (needs `GROQ_API_KEY` and a database that already has contacts). This does **not** run the capture graph:
+Vector query against stored embeddings (default: token hashes, not learned semantic embeddings; needs `GROQ_API_KEY` and a database that already has contacts). This does **not** run the capture graph:
 
 ```bash
 python -m crm query "Who did I meet regarding data warehouse consulting?"
@@ -192,7 +192,7 @@ crm --name "Sarah Khan" --image input/visiting_card.png
 
 The image path must point to an **existing file**. A placeholder file is enough to pass path validation, but only a real card image will extract useful fields.
 
-Successful runs persist a contact to **`data/crm.db`**. A later run with the same normalized email (or phone, or name+company) **updates** that row instead of inserting a second one. New notes are appended. `contact_id` and `crm_action` (`created` or `updated`) are printed in the JSON.
+Successful runs persist a contact to **`data/crm.db`**. Matching checks email when present, otherwise phone, otherwise name+company; an unmatched email does not fall through to phone. A matched row is updated and new notes append. `contact_id` and `crm_action` (`created` or `updated`) are printed in the JSON. An indexing failure can occur after the contact has already been saved; see the [failure semantics](docs/architecture.md#data-and-failure-semantics).
 
 ---
 

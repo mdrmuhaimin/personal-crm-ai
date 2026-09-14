@@ -1,8 +1,8 @@
 # Progress So Far — AI Conference CRM
 
-Last updated: 2026-09-12
+Last updated: 2026-09-14
 
-This document records only work that has been specified and completed. The next task is not listed here because it has not been specified.
+This document records completed work. Proposed learning tasks are in [the roadmap](docs/learning-roadmap.md); no next implementation task has been selected.
 
 Lessons (what to understand): [understandable_so_far.md](understandable_so_far.md).  
 How to run the current app: see [how_to_run.md](how_to_run.md).
@@ -18,13 +18,14 @@ After every later task that passes verification, update **this file** and `under
 
 ## What this project is
 
-A small conference CRM capture workflow. The user provides:
+A personal conference CRM with capture and vector retrieval. For capture, the user provides:
 
-- a person's name
+- optionally, a person's name (the card must contain an extractable full name)
 - a business-card image
 - an optional voice-file path
+- optional typed conversation notes
 
-The system is built as an explicit LangGraph. Deterministic Python handles validation, matching, persistence, and write verification. Groq is used to read the card image, transcribe an optional voice note, and (after a verified write) embed the search document. Contacts live in local SQLite (`data/crm.db`). Semantic search uses `sqlite-vec`; the vector index only stores IDs, not the canonical row.
+The system is built as an explicit LangGraph. Deterministic Python handles validation, matching, persistence, and write verification. Groq reads card images and transcribes optional voice notes. After a verified write, the default embedder creates local token-hash vectors; learned semantic quality has not been demonstrated. Contacts live in SQLite (`data/crm.db`); `sqlite-vec` stores vectors keyed by contact ID separately from canonical contact rows. Retrieval returns stored contacts, not generated RAG answers.
 
 No PostgreSQL or Telegram yet.
 
@@ -417,3 +418,21 @@ These were not specified as later work:
 | Ponytail rule | `.cursor/rules/ponytail.mdc` |
 | Graphify rule | `.cursor/rules/graphify.mdc` |
 | Code knowledge graph | `graphify-out/graph.json` |
+
+---
+
+## Portfolio documentation and learning roadmap — 2026-09-14
+
+**Status:** Done. Independent verifier PASS. Documentation only; no future feature was implemented.
+
+**What was built:** Rewrote the README around implemented capture, context, persistence, verification, indexing, retrieval, tracing, and Discord. Added an evidence-backed review assessment and architecture guide. Added 24 core learning cards and three optional discovery briefs, with dependencies, scope, acceptance criteria, verification, graph impact, and learning questions. Aligned the run guide with current matching and retrieval behavior.
+
+**Graph change:** None. Documented the existing capture graph and the separate query path. No `crm/` changes, so no Graphify rebuild was required.
+
+**Important files:** [README.md](README.md), [architecture guide](docs/architecture.md), [learning roadmap](docs/learning-roadmap.md), [run guide](how_to_run.md), and both learning-history documents.
+
+**Verification:** Independently ran `LANGSMITH_API_KEY='' LANGCHAIN_API_KEY='' LANGSMITH_TRACING=false LANGCHAIN_TRACING_V2=false .venv/bin/python -m pytest -q`: **102 passed, 2 deselected, 142 warnings in 14.26s**. Relative links/anchors, Markdown fences, documentation claims against source, and `git diff --check` passed. No live-model quality evaluation was run.
+
+**Evidence limits:** Default vectors are token hashes; perfect fake-provider experiment scores establish workflow behavior, not model quality. Write verification does not establish extraction truth. Discord contacts share one database. Detailed constraints and proposed improvements are in the architecture guide; older task entries retain their historical terminology.
+
+**Next:** Wait for the human to select one roadmap card. The roadmap is not authorization to execute future tasks automatically.

@@ -1,6 +1,6 @@
 # What You Should Understand So Far
 
-Last updated: 2026-09-12
+Last updated: 2026-09-14
 
 This is the learning notebook for the AI Conference CRM. It is the accumulated **What You Should Understand Now** after each completed task.
 
@@ -15,10 +15,12 @@ After every later task that passes verification, the orchestrator must update **
 
 | Kind | Examples | Who does it |
 | --- | --- | --- |
-| Probabilistic | Read a card image, transcribe voice, turn text into an embedding | Groq, behind a small interface |
-| Deterministic | Validate paths, normalize, match, CREATE/UPDATE, verify the row, KNN lookup, load rows by id | Python + SQLite + sqlite-vec |
+| Probabilistic interpretation | Read a card image, transcribe voice | Groq, behind a small interface |
+| Deterministic | Validate paths, normalize, match, CREATE/UPDATE, verify the row, create default token-hash vectors, KNN lookup, load rows by id | Python + SQLite + sqlite-vec |
 
 Do not ask a model to decide something ordinary code can decide.
+
+Current clarification: the default embedding implementation is token hashing, not a learned semantic model. Learned encoders can also produce deterministic vectors at inference; the useful distinction is learned representation versus lexical hashing. Older task entries below preserve their historical terminology. See [the architecture guide](docs/architecture.md) for the current evidence limits.
 
 ---
 
@@ -213,3 +215,18 @@ voice_present?
 - **Graphify-Labs Graphify** (https://github.com/Graphify-Labs/graphify): query `graphify-out/` before exploring files, then teach from what you found.
 
 Required reports after every specified task: Learning Step → Implementation Update → Evaluation → What You Should Understand Now. Then update this file and `progress_so_far.md`.
+
+---
+
+## Portfolio documentation and roadmap — 2026-09-14
+
+### What You Should Understand Now
+
+1. **Tests and model evaluations answer different questions.** Fake providers let us check routing, writes, and failures reliably. Real labeled cards and queries are needed to measure extraction accuracy and retrieval usefulness. Perfect fake scores do not prove either.
+2. **Verification has a boundary.** Pydantic checks structure, and `verify_write` checks stored values against intended extraction output. Neither proves the model read the card correctly. A contact can also be saved before indexing fails.
+3. **Embedding choice includes evidence and compatibility.** Token hashes mainly capture shared words. A learned model should be compared on labeled queries, latency, and resource use. Capture and query must use compatible model versions and document formats; changing those can require an index rebuild.
+4. **A controlled workflow demonstrates engineering depth.** Explicit state, nodes, conditional edges, and failure paths are the right tools for this capture process. Retrieval currently returns stored records; generated RAG answers would need separate relevance, support, citation, and abstention evaluations.
+
+**Exercise:** A run saves the correct extracted row, then embedding creation fails. Explain what `verify_write` proved, what remains unknown about the card, and why replaying capture could duplicate notes.
+
+Use [the roadmap](docs/learning-roadmap.md) to select one small task at a time. No future implementation has started.

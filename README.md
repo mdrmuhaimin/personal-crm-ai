@@ -1,71 +1,83 @@
-# AI Conference CRM Agent
+# AI Conference CRM
 
-## Context
+An end-to-end AI engineering project that turns a business-card image and optional conversation notes into a verified contact record. Vision and speech models interpret inputs; LangGraph orchestrates deterministic validation, matching, SQLite persistence, write verification, and vector indexing.
 
-Conferences and networking events create a simple but persistent problem: meeting people is easy, but capturing the useful context from those conversations is not.
+Reviewed 2026-09-14: capture, typed/voice context, storage, vector retrieval, optional LangSmith instrumentation, and a Discord DM adapter are implemented. Default vectors are **token hashes, not learned semantic embeddings**. The committed evaluation measures fake-provider workflow behavior, not real-model quality.
 
-A person may collect a business card, remember part of the discussion, and intend to follow up later. By the time they sit down to update a CRM, details are missing, notes are scattered, and duplicate contacts are easy to create.
+## Workflow
 
-This project explores a small AI-assisted workflow that captures that information at the moment it is still fresh.
+```mermaid
+flowchart TD
+    S[START] --> L[load_input] --> V[validate_input]
+    V --> E[extract_card] --> X[validate_extraction] --> VP{voice_present}
+    VP -->|valid with voice| T[transcribe_voice]
+    VP -->|no voice or invalid/error| M[merge_context]
+    T --> M --> P{persistable}
+    P -->|invalid/error| F[finalize]
+    P -->|otherwise| N[normalize_contact] --> C[search_crm] --> Q{match_found}
+    Q -->|matched| U[update_contact]
+    Q -->|valid unmatched| A[create_contact]
+    Q -->|error or unusable state| F
+    U --> W[verify_write]
+    A --> W --> O{write_ok}
+    O -->|failed| F
+    O -->|verified| D[build_search_document] --> B[create_embedding]
+    B --> I[store_embedding] --> F --> Z[END]
+```
 
-## What We Are Solving
+Invalid input still traverses guarded extraction nodes without calling providers. Embedding failure still traverses `store_embedding`, which skips its write. Querying follows a separate path: `query → embed → nearest vector rows → read contacts → format results`. It neither runs the capture graph nor generates an answer.
 
-The goal is to reduce the manual work between meeting someone and having a useful CRM record.
+## Run locally
 
-The user provides three things:
+Python 3.11+, from the repository root:
 
-* the person's name;
-* a photo of their business card;
-* optionally, a short voice note about the conversation.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python -m pytest -q
+```
 
-The system then turns those inputs into a structured contact record, checks whether the person already exists, and either creates a new record or updates the existing one.
+Set `GROQ_API_KEY` in your environment or local `.env` for capture and the current query entry point. Replace these paths with existing files:
 
-The important part is not simply extracting text from a business card. The system also needs to preserve the context that makes the contact useful later: where the person was met, what was discussed, what opportunities came up, and what might need a follow-up.
+```bash
+python -m crm --image /path/to/card.jpg --notes "Met at the conference; discussed warehouse modernization"
+python -m crm --image /path/to/card.jpg --voice /path/to/note.ogg
+python -m crm query "data warehouse consulting" --limit 5
+```
 
-## The Intended Experience
+`--name` is optional; the card schema requires a nonblank extracted `full_name`. The database defaults to `data/crm.db`, relative to the working directory. Capture prints selected final-state fields as JSON; exit code is `0` on `complete`, otherwise `1`. See [the run guide](how_to_run.md) for Windows setup, live tests, and Discord details.
 
-The workflow should feel simple from the user's point of view.
+## Current implementation
 
-The user gives the system the information they already have. The system handles the repetitive work of reading, organizing, checking, and storing it.
+| Component | Implementation | Important limit |
+| --- | --- | --- |
+| Card extraction | Direct Groq SDK; code default `qwen/qwen3.6-27b`; Pydantic schema | Structure validation does not verify card truth; live model availability was not tested in this review |
+| Voice/typed context | Groq `whisper-large-v3`; deterministic concatenation | Notes remain separate from card identity; no reminder extraction |
+| Storage | SQLite `ContactStore`; deterministic matching | Nonblank incoming fields overwrite old values; blank fields preserve them; notes append |
+| Verification | Re-read and compare intended fields after writes | Verifies persisted extraction output, not extraction accuracy |
+| Retrieval | `sqlite-vec` index joined to relational contacts | Default normalized 768-dimensional token hashes; no relevance threshold or measured semantic quality |
+| Interfaces | CLI and Discord DMs | Shared personal database, no ownership isolation |
+| Observability/evaluation | LangSmith tracing and ten fake-provider scenarios | Instrumentation and regression evidence, not real AI-quality evidence |
 
-If the contact already exists, the system should add useful new information without silently replacing conflicting data. If the contact is new, it should create a clean record without inventing anything that was not present in the source material.
+Matching uses the strongest available key: email if present, otherwise phone, otherwise name + company. An unmatched email does **not** fall through to phone. Updates do not provide conflict review.
 
-The result should be a CRM that is easier to keep current because capturing a contact requires very little effort.
+The embedder requires `GROQ_API_KEY` even for its local default. `CRM_EMBED_MODEL` attempts a Groq embeddings call; selected missing-model errors fall back to hashing. This is not a verified supported-model configuration. Index model identity is not stored, and the class advertises 768 dimensions regardless of remote output. Switching models requires a compatibility/rebuild design.
 
-## Why AI Is Useful Here
+## Verification and observability
 
-Some parts of this workflow are naturally unstructured.
+On 2026-09-14, `.venv/bin/python -m pytest -q` reported **102 passed, 2 deselected, 142 warnings** in the local Python 3.13 environment. The two live tests were excluded. This establishes offline regression behavior, not live API success or production readiness.
 
-A business card is an image. A voice note is conversational. A useful note such as “met at LEAP, interested in data warehouse consulting, follow up next week” does not arrive as a clean database row.
+[The committed experiment](eval/latest_experiment.json) gives all ten fake-provider scenarios 1.0. Its `unsupported_field_hallucination` metric is a null-preservation score: higher is better. Read [the architecture/evaluation guide](docs/architecture.md) for precise limits.
 
-AI is useful for interpreting those inputs and turning them into structured evidence.
+`python -m crm.eval` reruns the fake experiment and replaces `eval/latest_experiment.json`. A loaded `LANGSMITH_API_KEY`, including from `.env`, enables result upload; without it, results remain local. CLI tracing is also enabled by this key, under `ai-conference-crm` by default. Traces may include contact data and notes. Discord does not call the CLI tracing initializer; its tracing depends on environment configuration.
 
-The rest of the workflow should remain controlled by normal software: validating fields, finding existing contacts, deciding when to create or update, writing to the database, and verifying that the intended result was stored.
+For Discord, set `DISCORD_BOT_TOKEN` and `GROQ_API_KEY`, configure the gateway intent described in the run guide, and run `python -m crm.discord_bot`. DM a card, optionally add notes/voice, then type `save`. This shared-data prototype is not a multi-user service.
 
-## First-Version Boundary
+## Learn and extend
 
-The first version is deliberately narrow.
+- [Architecture, review assessment, and evaluation definitions](docs/architecture.md)
+- [Bite-sized implementation roadmap](docs/learning-roadmap.md): planned tasks with dependencies, acceptance criteria, tests, and learning questions
+- [Development harness](AGENTS.md), [progress history](progress_so_far.md), and [lessons learned](understandable_so_far.md)
 
-It is not intended to become a complete CRM platform. It does not need sales pipelines, automated outreach, calendar integration, multi-agent collaboration, or autonomous research.
-
-It needs to do one workflow well:
-
-**capture a contact from a business card and optional voice note, store it correctly, and avoid obvious duplicates.**
-
-Later, the stored information can support semantic search and RAG-style questions such as:
-
-> Who did I meet about data warehouse consulting?
-
-> Which people were interested in AI partnerships?
-
-> What did I discuss with this person?
-
-That future capability is useful, but it depends on getting the basic capture workflow right first.
-
-## Success
-
-The project is successful when a user can provide a name, business card image, and optional voice note, and the system reliably turns them into the correct CRM record.
-
-It should preserve useful context, avoid unsupported information, avoid obvious duplicate contacts, and confirm that the intended information was actually stored.
-
-The finished result should remain small enough to understand end to end. That is important because this project is also a learning exercise in building a real AI workflow rather than a collection of disconnected AI features.
+This is a bounded AI workflow, not an autonomous or multi-agent application. Learned semantic retrieval, real-card evaluation, CI, and privacy/recovery improvements are planned. RAG answer generation, LinkedIn tracking, follow-up drafting, PostgreSQL, and a web UI are not implemented.
