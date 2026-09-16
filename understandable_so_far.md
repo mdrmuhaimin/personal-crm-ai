@@ -260,3 +260,13 @@ Use [the development roadmap](docs/development-roadmap.md) to select one small t
 3. Native extensions are part of reproducibility. `sqlite-vec`+`apsw` must install or embedding tests must fail loudly — silent skip would hide a broken baseline.
 
 **Exercise:** Why is `102 passed` in your dev `.venv` insufficient to claim reproducibility, and what does the fresh `/tmp` venv proof add?
+
+## Card 03 — Offline CI (local done, hosted pending) — 2026-09-16
+
+### What You Should Understand Now
+
+1. CI repeats the lock-install + offline suite on a machine nobody touched. Read-only perms + no secrets + tracing flags off keep it offline and unable to leak or upload contacts.
+2. Green CI proves workflow regression only — `102 passed` with fakes says routing/writes/failures behave, nothing about real card reading or semantic search. That is card 03's learning question answered in advance.
+3. A workflow file is a claim until a hosted run exists. Local equivalence (fresh `/tmp` venv, same commands) is necessary but not sufficient; the run URL is the evidence.
+
+**Exercise:** Open `.github/workflows/tests.yml` and point to the three lines that keep live providers out of CI (hint: install source, test flags, env).

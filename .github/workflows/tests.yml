@@ -1,0 +1,25 @@
+name: tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements-lock.txt
+      - run: pip install -e . --no-deps
+      - run: python -m pytest -q
+        env:
+          LANGSMITH_TRACING: "false"
+          LANGCHAIN_TRACING_V2: "false"

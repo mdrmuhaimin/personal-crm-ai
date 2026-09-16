@@ -149,6 +149,8 @@ Status: DONE — verifier PASS | 2026-09-16 | requirements-lock.txt NEW | fresh 
 
 ### 03 — Add offline GitHub Actions CI (60 minutes)
 
+Status: IN PROGRESS | owner: implementer | started: 2026-09-16
+
 1. Add push/PR triggers, one supported Python setup and the locked install command from 02; use minimal read-only repository permissions.
 2. Run offline pytest with tracing/uploads disabled and no provider secrets; inspect local equivalence, then record the hosted run URL/result when available.
 
