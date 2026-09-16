@@ -1,6 +1,6 @@
 # Architecture and evidence guide
 
-Reviewed against the local repository on 2026-09-14. Current implementation is described here; proposed work is in [the roadmap](learning-roadmap.md).
+Reviewed against the local repository on 2026-09-14. Current implementation is described here; completed strengths and proposed implementation contracts are in [the development roadmap](development-roadmap.md).
 
 ## Assessment of the supplied review
 

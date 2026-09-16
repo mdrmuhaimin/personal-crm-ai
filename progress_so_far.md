@@ -1,8 +1,8 @@
 # Progress So Far — AI Conference CRM
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
-This document records completed work. Proposed learning tasks are in [the roadmap](docs/learning-roadmap.md); no next implementation task has been selected.
+This document records completed work. Current strengths and proposed tasks are in [the development roadmap](docs/development-roadmap.md); no next implementation task has been selected.
 
 Lessons (what to understand): [understandable_so_far.md](understandable_so_far.md).  
 How to run the current app: see [how_to_run.md](how_to_run.md).
@@ -429,10 +429,46 @@ These were not specified as later work:
 
 **Graph change:** None. Documented the existing capture graph and the separate query path. No `crm/` changes, so no Graphify rebuild was required.
 
-**Important files:** [README.md](README.md), [architecture guide](docs/architecture.md), [learning roadmap](docs/learning-roadmap.md), [run guide](how_to_run.md), and both learning-history documents.
+**Important files:** [README.md](README.md), [architecture guide](docs/architecture.md), [development roadmap](docs/development-roadmap.md), [run guide](how_to_run.md), and both learning-history documents.
 
 **Verification:** Independently ran `LANGSMITH_API_KEY='' LANGCHAIN_API_KEY='' LANGSMITH_TRACING=false LANGCHAIN_TRACING_V2=false .venv/bin/python -m pytest -q`: **102 passed, 2 deselected, 142 warnings in 14.26s**. Relative links/anchors, Markdown fences, documentation claims against source, and `git diff --check` passed. No live-model quality evaluation was run.
 
 **Evidence limits:** Default vectors are token hashes; perfect fake-provider experiment scores establish workflow behavior, not model quality. Write verification does not establish extraction truth. Discord contacts share one database. Detailed constraints and proposed improvements are in the architecture guide; older task entries retain their historical terminology.
 
 **Next:** Wait for the human to select one roadmap card. The roadmap is not authorization to execute future tasks automatically.
+
+## Development roadmap engineering handoff — 2026-09-15
+
+**Status:** Done. Independent verifier PASS. Documentation only.
+
+**What changed:** Renamed the roadmap to [docs/development-roadmap.md](docs/development-roadmap.md). Added completed capabilities with source/test evidence, sound design choices to preserve, priority milestones, and proposed evaluation, embedding/index, and retry contracts. All 24 core cards now include numbered implementation steps; cards 14, 21 and 22 have individually selectable substeps. Preserved the three optional discovery briefs and added a copy-paste agent handoff, status rules, and completion evidence checklist. Updated README, architecture, and both history-document links.
+
+**Graph change:** None. No application, configuration, or test code changed.
+
+**Verification:** Independent documentation checks covered 9 authored Markdown files and 65 relative links/anchors with zero issues; stable task IDs, required fields and numbered steps passed. `git diff --check` passed. The application suite was not rerun for this documentation-only change; the last recorded result remains **102 passed, 2 deselected, 142 warnings on 2026-09-14**.
+
+**Next:** The human selects one development card or labeled substep. No future implementation began.
+
+## Card 01 — Trace one success and three failures — 2026-09-16
+
+**Status:** Done. Independent verifier PASS. Documentation only; no `crm/` changes.
+
+**What was built:** New `docs/graph-walkthrough.md` (125 lines) tracing card-only success (13 nodes), invalid image (6 nodes), failed verification (10 nodes), and embedding failure (13 nodes + vector-store variant). Each trace lists visited nodes via `graph.stream`, status transitions, provider calls (extractor/transcriber/embedder), store calls (`find_match`/`create`/`get`/`upsert_embedding`), and committed writes (row yes/no, vector yes/no). Distinguishes executed guarded node (in stream but no-op) from skipped edge (absent from stream). Reconciles README diagram labels VP/P/Q/O with routers and confirms query path is separate. Answers why error can keep saved contact ID: writes commit before indexing, failures don't roll back.
+
+**Graph change:** None. No application, configuration, or test code changed.
+
+**Verification:** Focused `.venv/bin/python -m pytest -q tests/test_graph.py tests/test_verify.py tests/test_embeddings.py` → **25 passed**. Full `.venv/bin/python -m pytest -q` → **102 passed, 2 deselected, 142 warnings**. Verifier independently reproduced invalid-image (6 nodes, 0/0/0 calls), failed-verify (10 nodes, embedder 0 calls), and embed-fail (13 nodes, status error with verified contact) traces; confirmed failed verification never embeds via `tests/test_embeddings.py:test_failed_verify_skips_embedding`. `git status --short crm/ tests/` empty.
+
+**Next:** Wait for human to select next card (02 needs 01, now unblocked; 04 needs 01, now unblocked). No future implementation began.
+
+## Card 02 — Reproducible dependency baseline — 2026-09-16
+
+**Status:** Done. Independent verifier PASS. Config/docs only; no `crm/` changes.
+
+**What was built:** New `requirements-lock.txt` (69 lines, full `pip freeze` pin minus editable line) + `how_to_run.md` §3b with ONE repeatable path: `venv /tmp/...` → `pip install -r requirements-lock.txt` → `pip install -e . --no-deps` → `pytest -q`. Baseline Python 3.13.4 Darwin x86_64 pip 25.1.1. Documents `sqlite-vec`+`apsw` prerequisite and APSW wrapper (`crm/db.py`), with embedding-test failure as actionable install error, not silent skip. No upgrades, no new runtime deps, no CI.
+
+**Graph change:** None.
+
+**Verification:** Repo `.venv/bin/python -m pytest -q` → **102 passed, 2 deselected, 142 warnings**. Verifier fresh venv `/tmp/crm-02-verify-venv` → lock install clean → `pip install -e . --no-deps` ok → **102 passed, 2 deselected, 142 warnings in 12.21s**, identical. `git status crm/` empty, `pyproject.toml` diff empty, no `.github/workflows`.
+
+**Next:** Wait for human. Card 03 (CI, needs 02) now unblocked. No future implementation began.

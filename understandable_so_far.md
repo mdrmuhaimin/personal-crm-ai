@@ -1,6 +1,6 @@
 # What You Should Understand So Far
 
-Last updated: 2026-09-14
+Last updated: 2026-09-15
 
 This is the learning notebook for the AI Conference CRM. It is the accumulated **What You Should Understand Now** after each completed task.
 
@@ -229,4 +229,34 @@ Required reports after every specified task: Learning Step → Implementation Up
 
 **Exercise:** A run saves the correct extracted row, then embedding creation fails. Explain what `verify_write` proved, what remains unknown about the card, and why replaying capture could duplicate notes.
 
-Use [the roadmap](docs/learning-roadmap.md) to select one small task at a time. No future implementation has started.
+Use [the development roadmap](docs/development-roadmap.md) to select one small task at a time. No future implementation has started.
+
+## Development roadmap engineering handoff — 2026-09-15
+
+### What You Should Understand Now
+
+1. A development roadmap starts with working capabilities and their evidence. It preserves sound decisions while separating missing functionality from missing quality measurements.
+2. An implementable engineering plan names the data contracts, component responsibilities, dependencies, failure behavior, and evidence required for completion. The coding agent should not have to invent those boundaries.
+3. Recovery is part of the design: replacing an index must preserve usable data after interruption, and replaying a committed request must not be mistaken for proof of completed verification or indexing.
+
+**Exercise:** Open card 14 in [the development roadmap](docs/development-roadmap.md). Explain which index remains active if rebuilding stops before the active-pointer transaction commits, and why contact notes should remain unchanged.
+
+## Card 01 — Trace success and failures — 2026-09-16
+
+### What You Should Understand Now
+
+1. A guarded node still runs but does nothing when status is wrong; a skipped edge never runs because a router chose another path. `graph.stream` shows the difference: present-but-no-op vs absent.
+2. Side effects follow commit order, not final status. `create_contact` commits before `verify_write` re-reads and before any embedding, so `error` can still keep a saved `contact_id` with no vector.
+3. Failed verification must never embed. `write_ok` routes `write_failed` straight to `finalize`, so `build_search_document`/`create_embedding`/`store_embedding` are absent and `embedder.calls` stays empty.
+
+**Exercise:** In `docs/graph-walkthrough.md` trace (d), explain why `store_embedding` appears in the 13-node list on embedder failure even though it writes nothing, citing the guard line.
+
+## Card 02 — Reproducible baseline — 2026-09-16
+
+### What You Should Understand Now
+
+1. Unbounded deps (`langgraph`, `pydantic` with no pins) can resolve differently tomorrow. A full `pip freeze` lock records exact resolved versions so fresh envs install identical packages.
+2. Lock + editable install are split: lock carries deps, `pip install -e . --no-deps` carries only the package, avoiding double resolution.
+3. Native extensions are part of reproducibility. `sqlite-vec`+`apsw` must install or embedding tests must fail loudly — silent skip would hide a broken baseline.
+
+**Exercise:** Why is `102 passed` in your dev `.venv` insufficient to claim reproducibility, and what does the fresh `/tmp` venv proof add?
