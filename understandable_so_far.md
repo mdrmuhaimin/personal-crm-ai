@@ -270,3 +270,13 @@ Use [the development roadmap](docs/development-roadmap.md) to select one small t
 3. A workflow file is a claim until a hosted run exists. Local equivalence (fresh `/tmp` venv, same commands) is necessary but not sufficient; the run URL is the evidence.
 
 **Exercise:** Open `.github/workflows/tests.yml` and point to the three lines that keep live providers out of CI (hint: install source, test flags, env).
+
+## Card 04 — Bounded orchestration — 2026-09-16
+
+### What You Should Understand Now
+
+1. Autonomy lives in who authors transitions, not which library runs the graph. Four plain-Python routers choose every branch here; the model never returns a branch name — that is what makes this a workflow, not an agent.
+2. Termination is a structural property: DAG, every path ends at `finalize → END`, bounded steps. A planner's stop condition is a model judgment, which needs budgets, timeouts, and proofs the fixed graph gets for free.
+3. Letting the model choose match/write order would break today's single write-path guarantees — `verify_write` plus fixed create/update order only covers the paths the author enumerated.
+
+**Exercise:** Name one node that looks "smart" but is deterministic, and one router whose branch a model must never choose — citing both line numbers from `docs/design-decisions.md`.

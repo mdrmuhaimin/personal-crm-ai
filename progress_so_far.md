@@ -484,3 +484,15 @@ These were not specified as later work:
 **Verification (hosted):** Run [35061475950](https://github.com/mdrmuhaimin/personal-crm-ai/actions/runs/35061475950) on PR #1 (`ft/finalization`, headSha `7335862`) → **completed, success**; job `offline` green in 30s, all 6 steps (checkout, setup-python, lock install, editable install, pytest, post) passed. One non-blocking runner-image annotation (Node 20 deprecation from checkout/setup-python, not our code).
 
 **Next:** P0-reproduce complete (01→02→03). Next candidates: 04 (needs 01), 05 (needs 01), 09 (needs 01), 20 (needs 01). No future implementation began.
+
+## Card 04 — Workflow versus autonomous agents — 2026-09-16
+
+**Status:** Done. Independent verifier PASS. Documentation only; no `crm/` or test changes.
+
+**What was built:** New `docs/design-decisions.md` (114 lines): classification table placing all 15 nodes + 4 routers in exactly one bucket (3 interpretation, 7 deterministic transformation, 5 side-effect, 4 routing) with code refs; authorship rule (model interprets, plain-Python routers branch); termination paths (success + 3 short-circuits, DAG, bounded steps); actual walkthrough trace (a) 13-node success; hypothetical multi-source enrichment planner (strictly hypothetical) with four testing/control burden items; verdict + explicitly out-of-scope scenario; learning answer (LangGraph ≠ autonomous).
+
+**Graph change:** None.
+
+**Verification:** Verifier spot-checked 8 code refs (routers, finalize, build_graph edges, provider protocols) — 0 wrong; trace (a) character-identical to `expected_valid` and walkthrough; hypothetical confirmed unimplemented (`crm/` + `tests/` empty in status); roadmap criteria retained.
+
+**Next:** P0-explain complete (01→04). Next candidates: 05 (needs 01), 09 (needs 01), 20 (needs 01). No future implementation began.

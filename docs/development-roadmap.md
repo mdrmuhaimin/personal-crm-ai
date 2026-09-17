@@ -17,7 +17,7 @@ Navigate: [completed strengths](#completed-foundation-what-is-done-and-done-righ
 | DONE — offline evaluation and optional traces | [Evaluation](../crm/eval.py), [tracing](../crm/tracing.py), [evaluation tests](../tests/test_eval.py) | Fakes isolate orchestration correctness; tracing exposes execution. Neither measures real-model quality. |
 | DONE — current README and architecture explanation | [README](../README.md), [architecture](architecture.md), [history](../progress_so_far.md) | Claims distinguish implemented behavior from evidence. `.gitignore` already ignores `graphify-out/`; public metadata/license checks and demo remain planned (23–24). |
 
-Last recorded full offline test evidence is **2026-09-14: 102 passed, 2 deselected, 142 warnings**, recorded in [progress history](../progress_so_far.md#portfolio-documentation-and-learning-roadmap--2026-09-14). This roadmap edit did not rerun it. Historical live smoke checks are not a labeled quality benchmark. No current claim establishes production readiness or generated RAG-answer quality; queries return contact records.
+Last recorded full offline test evidence is **2026-09-16: 102 passed, 2 deselected, 142 warnings**, re-verified identically across cards 02–03 implementation, verification, and both commit gates (see [progress history](../progress_so_far.md)). This roadmap edit did not introduce new test behavior. Historical live smoke checks are not a labeled quality benchmark. No current claim establishes production readiness or generated RAG-answer quality; queries return contact records.
 
 ## Priorities and milestone exit evidence
 
@@ -31,7 +31,7 @@ Last recorded full offline test evidence is **2026-09-14: 102 passed, 2 deselect
 | P2 — present the evidence | 03/08/15 → 23 → 24 | Reproducible demonstration, linked reports, accurate metadata |
 | Later discovery only | L1–L3 with their stated dependencies | Reviewed product/access contracts; no feature implementation authorized |
 
-The human selects **one card or labeled substep** at a time; these priorities are guidance, not automatic execution authorization. Implementation cards **01–24: NOT STARTED**. Discovery cards **L1–L3: NOT STARTED**. The completed foundation above is separate from these future cards.
+The human selects **one card or labeled substep** at a time; these priorities are guidance, not automatic execution authorization. Implementation cards **01–04: DONE** (see per-card status lines below); **05–24: NOT STARTED**. Discovery cards **L1–L3: NOT STARTED**. The completed foundation above is separate from these future cards.
 
 For each selected card, add a status line beneath its heading: `Status: IN PROGRESS | owner: … | started: …`. Use `BLOCKED — reason/evidence` if inputs are unavailable; retain unfinished acceptance criteria. Change to `DONE — verifier PASS | date | commit/diff | evidence path` only after independent verification and history updates. For split cards track each substep; the parent stays incomplete until all substeps pass. A written plan or mocked live call is not a completed live evaluation.
 
@@ -162,6 +162,8 @@ Status: DONE — verifier PASS | 2026-09-16 | hosted run 35061475950 success (of
 - **Graph change:** none. **Learning question:** what does green CI prove about real-card extraction?
 
 ### 04 — Explain workflow versus autonomous agents (30 minutes)
+
+Status: DONE — verifier PASS | 2026-09-16 | docs/design-decisions.md NEW | 8 code refs spot-checked, 0 wrong
 
 1. Classify each existing node/router as interpretation, deterministic transformation, side effect or routing; identify termination paths.
 2. Write the decision record using one actual capture trace and one hypothetical model-planned alternative; explain the additional testing/control burden without implementing it.
