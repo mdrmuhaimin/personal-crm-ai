@@ -473,14 +473,14 @@ These were not specified as later work:
 
 **Next:** Wait for human. Card 03 (CI, needs 02) now unblocked. No future implementation began.
 
-## Card 03 — Offline GitHub Actions CI — 2026-09-16 (IN PROGRESS, hosted run outstanding)
+## Card 03 — Offline GitHub Actions CI — 2026-09-16
 
-**Status:** Local part DONE, independent verifier PASS (local). Card stays IN PROGRESS — no hosted run exists yet, per stop rule do not mark DONE before run URL exists.
+**Status:** Done. Independent verifier PASS (local) + hosted green run confirmed.
 
 **What was built:** New `.github/workflows/tests.yml` (25 lines, greenfield): push+PR on `[main, develop]`, `permissions: contents: read`, `setup-python@v5` `"3.13"`, `pip install -r requirements-lock.txt` → `pip install -e . --no-deps` → `pytest -q` with `LANGSMITH_TRACING`/`LANGCHAIN_TRACING_V2` false. No secrets, uploads, matrix, or deploys. `pyproject.toml` untouched (`addopts -m "not live"` already excludes live). No `crm/` changes.
 
 **Verification (local):** Repo `.venv` with tracing flags off → **102 passed, 2 deselected**. Verifier fresh `/tmp/crm-03-verify-venv` exact CI sequence → **102 passed, 2 deselected**. YAML parses; triggers/permissions/Python verified; secret/upload/continue-on-error/matrix/deploys all absent.
 
-**Outstanding:** Commit + push + PR to trigger first hosted run, then record run URL + result in roadmap card 03 status and here. Uncommitted: `.github/` untracked, roadmap 03 IN PROGRESS line.
+**Verification (hosted):** Run [35061475950](https://github.com/mdrmuhaimin/personal-crm-ai/actions/runs/35061475950) on PR #1 (`ft/finalization`, headSha `7335862`) → **completed, success**; job `offline` green in 30s, all 6 steps (checkout, setup-python, lock install, editable install, pytest, post) passed. One non-blocking runner-image annotation (Node 20 deprecation from checkout/setup-python, not our code).
 
-**Next:** Wait for human (explicit commit/push authorization needed for hosted evidence). No future implementation began.
+**Next:** P0-reproduce complete (01→02→03). Next candidates: 04 (needs 01), 05 (needs 01), 09 (needs 01), 20 (needs 01). No future implementation began.
