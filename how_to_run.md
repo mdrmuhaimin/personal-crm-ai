@@ -82,6 +82,25 @@ This installs:
 
 ---
 
+## 3b. Reproducible locked install (card 02)
+
+Baseline: Python 3.13.4 on Darwin x86_64 (`Darwin ... RELEASE_X86_64 x86_64`, pip 25.1.1), recorded 2026-09-16. The lock is `requirements-lock.txt` — a `pip freeze` pin of the working `.venv` (minus the editable project line), covering `langgraph`, `pydantic`, `groq`, `python-dotenv`, `sqlite-vec`, `apsw`, `langsmith`, `discord.py`, `pytest` plus transitive pins. Design choice: full freeze over `constraints.txt`, because the freeze records the exact resolved versions so a fresh environment installs identical packages instead of re-resolving the unbounded ranges in `pyproject.toml`. No packages were upgraded and no new runtime deps were added.
+
+One repeatable path (from the project root):
+
+```bash
+python3 -m venv /tmp/crm-02-repro-venv
+/tmp/crm-02-repro-venv/bin/pip install -r requirements-lock.txt
+/tmp/crm-02-repro-venv/bin/pip install -e . --no-deps
+/tmp/crm-02-repro-venv/bin/python -m pytest -q
+```
+
+Fresh-venv proof (outside the repo, 2026-09-16): lock installed cleanly, `pip install -e . --no-deps` succeeded, offline suite → **102 passed, 2 deselected** in ~10s.
+
+Native SQLite extension prerequisite: vector indexing needs `sqlite-vec` **and** `apsw` (both pinned in the lock). This Mac CPython build omits `sqlite3` extension loading, so `crm/db.py` wraps an APSW connection (`_ApswConnectionWrapper`) for `sqlite_vec.load()`. If `apsw`/`sqlite-vec` fail to install on another platform, embedding tests will fail instead of silently skipping — treat that as an actionable install failure.
+
+---
+
 ## 4. Run the tests
 
 From the project root:

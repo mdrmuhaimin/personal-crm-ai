@@ -11,3 +11,4 @@ build/
 htmlcov/
 graphify-out/
 data/*.db
+temp/
