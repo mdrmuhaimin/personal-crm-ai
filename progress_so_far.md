@@ -481,7 +481,7 @@ These were not specified as later work:
 
 **Verification (local):** Repo `.venv` with tracing flags off → **102 passed, 2 deselected**. Verifier fresh `/tmp/crm-03-verify-venv` exact CI sequence → **102 passed, 2 deselected**. YAML parses; triggers/permissions/Python verified; secret/upload/continue-on-error/matrix/deploys all absent.
 
-**Verification (hosted):** Run [35061475950](https://github.com/mdrmuhaimin/personal-crm-ai/actions/runs/35061475950) on PR #1 (`ft/finalization`, headSha `7335862`) → **completed, success**; job `offline` green in 30s, all 6 steps (checkout, setup-python, lock install, editable install, pytest, post) passed. One non-blocking runner-image annotation (Node 20 deprecation from checkout/setup-python, not our code).
+**Verification (hosted):** Run [35263366897](https://github.com/mdrmuhaimin/personal-crm-ai/actions/runs/35263366897) on PR #1 (headSha `844d7b6`, the current head) → **completed, success**; job `offline` green, all 6 steps (checkout, setup-python, lock install, editable install, pytest, post) passed. (Supersedes run 35061475950, which tested headSha `7335862`.) One non-blocking runner-image annotation (Node 20 deprecation from checkout/setup-python, not our code).
 
 **Next:** P0-reproduce complete (01→02→03). Next candidates: 04 (needs 01), 05 (needs 01), 09 (needs 01), 20 (needs 01). No future implementation began.
 

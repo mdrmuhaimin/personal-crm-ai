@@ -80,4 +80,4 @@ For Discord, set `DISCORD_BOT_TOKEN` and `GROQ_API_KEY`, configure the gateway i
 - [Development roadmap](docs/development-roadmap.md): completed strengths, remaining priorities, principal engineering contracts, and small agent-ready implementation tasks
 - [Development harness](AGENTS.md), [progress history](progress_so_far.md), and [lessons learned](understandable_so_far.md)
 
-This is a bounded AI workflow, not an autonomous or multi-agent application. Learned semantic retrieval, real-card evaluation, CI, and privacy/recovery improvements are planned. RAG answer generation, LinkedIn tracking, follow-up drafting, PostgreSQL, and a web UI are not implemented.
+This is a bounded AI workflow, not an autonomous or multi-agent application. Offline CI regression runs on pushes/PRs; learned semantic retrieval, real-card evaluation, and privacy/recovery improvements are planned. RAG answer generation, LinkedIn tracking, follow-up drafting, PostgreSQL, and a web UI are not implemented.

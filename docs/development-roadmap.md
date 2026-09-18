@@ -149,7 +149,7 @@ Status: DONE — verifier PASS | 2026-09-16 | requirements-lock.txt NEW | fresh 
 
 ### 03 — Add offline GitHub Actions CI (60 minutes)
 
-Status: DONE — verifier PASS | 2026-09-16 | hosted run 35061475950 success (offline 30s, headSha 7335862) | local 102 passed, 2 deselected
+Status: DONE — verifier PASS | 2026-09-16, evidence refreshed 2026-09-17 | hosted run 35263366897 success (offline job, headSha 844d7b6) | local 102 passed, 2 deselected
 
 1. Add push/PR triggers, one supported Python setup and the locked install command from 02; use minimal read-only repository permissions.
 2. Run offline pytest with tracing/uploads disabled and no provider secrets; inspect local equivalence, then record the hosted run URL/result when available.
